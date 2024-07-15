@@ -49,4 +49,28 @@ def calculate_free_energy(Q,R,f,lam):
 free_energy_diff_function = calculate_free_energy(Q, R, f(np.arange(len(Q))), lambda_value)
 print(f"Free energy difference calculated by function: {free_energy_diff_function}")
 
+def v(s):
+    return -np.log(R[s])
+P_lambda_1 = np.exp(-lambda_value * v(np.arange(len(R))))
+P_lambda_1 /= np.sum(P_lambda_1) 
+E_Q_f_new = np.sum(Q * v(np.arange(len(Q))))
+E_R_f_new = np.sum(R * v(np.arange(len(R))))
+H_Q_new = -np.sum(Q * np.log(Q)) 
+H_R_new = -np.sum(R * np.log(R))  
+F_Q_lambda_1 = E_Q_f_new - (1 / lambda_value) * H_Q_new  # Free energy F(Q, 1)
+F_R_lambda_1 = E_R_f_new - (1 / lambda_value) * H_R_new  # Free energy F(R, 1)
+H_Q_R_1 = np.sum(Q * np.log(Q / R))
+free_energy_difference_new = F_Q_lambda_1 - F_R_lambda_1
+
+print(f"Boltzmann-Gibbs distribution P*(s, 1):\n{P_lambda_1}")
+print(f"Free energy F(Q, 1): {F_Q_lambda_1}")
+print(f"Free energy F(R, 1): {F_R_lambda_1}")
+print(f"Relative entropy new H(Q, R): {H_Q_R_1}")
+print(f"Difference in free energies F(Q, 1) - F(R, 1): {free_energy_difference_new}")
+
+# F(Q, 1) - F(R, 1) = H(Q, R)
+tolerance = 1e-8 
+assert np.isclose(free_energy_difference_new, H_Q_R_1, atol=tolerance), \
+    f"The relationship F(Q, 1) - F(R, 1) = H(Q, R) does not hold within tolerance {tolerance}."
+print("Relationship verified.")
 
