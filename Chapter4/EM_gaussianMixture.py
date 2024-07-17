@@ -2,6 +2,10 @@ import numpy as np
 from scipy.stats import multivariate_normal
 import matplotlib.pyplot as plt
 
+"""
+Implements the Expectation Maximization Algorithm to synthetic Gaussian Mixture Distributions
+"""
+
 
 def initialize_parameters(data, K):
     n, d = data.shape
