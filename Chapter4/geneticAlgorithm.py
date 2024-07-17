@@ -24,6 +24,20 @@ def generate_distance_matrix(num_cities):
 num_cities = 10
 distance_matrix = generate_distance_matrix(num_cities)
 print(distance_matrix)
+"""
+printed distance matrix: 
+
+[[ 0 28 75 69 21 57 76 48 70 79]
+ [28  0 30 75 35 57 41 55 17 53]
+ [75 30  0 54 41 65 92 65 74 43]
+ [69 75 54  0 50 59 80 43 75 85]
+ [21 35 41 50  0 29 36 56 97 69]
+ [57 57 65 59 29  0 64 66 62 33]
+ [76 41 92 80 36 64  0 27 32 50]
+ [48 55 65 43 56 66 27  0 82 23]
+ [70 17 74 75 97 62 32 82  0 72]
+ [79 53 43 85 69 33 50 23 72  0]]
+"""
 
 def calculate_total_distance(route,distance_matrix):
     total_distance = 0
