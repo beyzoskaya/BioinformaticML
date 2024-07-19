@@ -40,6 +40,16 @@ Protein Sequence 84:
 [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0]
 
 """
+"""
+data shape: (68,53,20)
+68 number of sequences
+53 padded sequence length
+20 size of one hot encoding for each amino acid
+batch size 32 --> 2 full batches and 1 partial batch 32x2 + 4 = 68
+
+flattened input: (32,53,20) to (32,1060)
+
+"""
 
 class SimpleNN(nn.Module):
     def __init__(self,input_size):
