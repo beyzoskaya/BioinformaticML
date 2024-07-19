@@ -217,5 +217,21 @@ Confussion Matrix for SimpleMLP:
    macro avg       0.55      0.53      0.54      3000
 weighted avg       0.56      0.57      0.56      3000
 
+Confussion Matrix for AdvanceMLP:
+ [[390 163 239]
+ [164 430 294]
+ [281 274 765]]
+
+ Classification Report AdvanceMLP:
+              precision    recall  f1-score   support
+
+ alpha-helix       0.47      0.49      0.48       792
+  beta-sheet       0.50      0.48      0.49       888
+        coil       0.59      0.58      0.58      1320
+
+    accuracy                           0.53      3000
+   macro avg       0.52      0.52      0.52      3000
+weighted avg       0.53      0.53      0.53      3000
+
 
 """
