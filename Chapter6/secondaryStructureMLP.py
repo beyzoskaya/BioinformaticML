@@ -8,6 +8,8 @@ import random
 from collections import Counter
 from torch.utils.data import DataLoader, TensorDataset
 import matplotlib.pyplot as plt
+import torch.nn.functional as F
+from sklearn.metrics import confusion_matrix
 
 amino_acids = ['Ala', 'Arg', 'Asn', 'Asp', 'Cys', 'Gln', 'Glu', 'Gly', 'His', 'Ile', 'Leu', 'Lys', 'Met', 'Phe', 'Pro', 'Ser', 'Thr', 'Trp', 'Tyr', 'Val']
 alphabet_size = len(amino_acids) + 1
@@ -94,11 +96,38 @@ class SimpleMLP(nn.Module):
         x = self.sigmoid(x)
         return x
 
+class AdvancedMLP(nn.Module):
+    def __init__(self, input_size, hidden_size1, hidden_size2, output_size):
+        super(AdvancedMLP, self).__init__()
+        self.fc1 = nn.Linear(input_size, hidden_size1)
+        self.bn1 = nn.BatchNorm1d(hidden_size1)
+        self.dropout1 = nn.Dropout(0.5)
+        
+        self.fc2 = nn.Linear(hidden_size1, hidden_size2)
+        self.bn2 = nn.BatchNorm1d(hidden_size2)
+        self.dropout2 = nn.Dropout(0.5)
+        
+        self.fc3 = nn.Linear(hidden_size2, output_size)
+        
+    def forward(self, x):
+        x = self.fc1(x)
+        x = self.bn1(x)
+        x = F.relu(x)
+        x = self.dropout1(x)
+        
+        x = self.fc2(x)
+        x = self.bn2(x)
+        x = F.relu(x)
+        x = self.dropout2(x)
+        
+        x = self.fc3(x)
+        return x
+    
 def prepare_data_loader(X, y, batch_size):
     dataset = TensorDataset(torch.tensor(np.array(X), dtype=torch.float32), torch.tensor(np.array(y), dtype=torch.long))
     return DataLoader(dataset, batch_size=batch_size, shuffle=True)
 
-batch_size = 32
+batch_size = 16
 train_loader = prepare_data_loader(X_train, y_train, batch_size)
 test_loader = prepare_data_loader(X_test, y_test, batch_size)
 
@@ -106,7 +135,11 @@ input_size = window_size * alphabet_size
 hidden_size = 40
 output_size = 3
 
-model = SimpleMLP(input_size=input_size, hidden_size=hidden_size, output_size=output_size)
+hidden_size1 = 128
+hidden_size2 = 64
+model = AdvancedMLP(input_size=input_size, hidden_size1=hidden_size1, hidden_size2=hidden_size2, output_size=output_size)
+
+#model = SimpleMLP(input_size=input_size, hidden_size=hidden_size, output_size=output_size)
 criterion = nn.CrossEntropyLoss()
 optimizer = optim.Adam(model.parameters(), lr=0.001)
 
@@ -131,7 +164,7 @@ plt.plot(range(1, num_epochs + 1), losses, marker='o')
 plt.xlabel('Epoch')
 plt.ylabel('Loss')
 plt.title('Loss Curve')
-plt.savefig('loss_plot_MLP_Secondary_struc.png')
+plt.savefig('loss_plot_AdvncedMLP_Secondary_struc.png')
 plt.show()
 
 model.eval()
@@ -147,3 +180,42 @@ with torch.no_grad():
 report = classification_report(y_true, y_pred, target_names=['alpha-helix', 'beta-sheet', 'coil'])
 print("Classification Report:")
 print(report)
+
+cm = confusion_matrix(y_true,y_pred,labels=[0,1,2])
+PX = np.diag(cm) # True Positive
+PfX = np.sum(cm, axis=0) - PX # False Positive
+NX = np.sum(cm, axis=1) - PX
+NfX = np.sum(cm) - (PX + PfX + NX)
+C_X = np.zeros(3)  
+for i in range(3):
+    numerator = (PX[i] * NX[i]) - (NfX[i] * PfX[i])
+    denominator = ((NX[i] + NfX[i]) * (NX[i] + PfX[i]) * (PX[i] + NfX[i]) * (PX[i] + PfX[i]))
+    if denominator == 0:
+        C_X[i] = 0
+    else:
+        C_X[i] = numerator / denominator
+
+print("Confusion Matrix:\n", cm)
+print(f"CX for alpha-helix: {C_X[0]}")
+print(f"CX for beta-sheet: {C_X[1]}")
+print(f"CX for coil: {C_X[2]}")
+
+"""
+Confussion Matrix for SimpleMLP:
+ [[464  85 357]
+ [122 281 281]
+ [268 186 956]]
+
+ Classification Report for SimpleMLP:
+              precision    recall  f1-score   support
+
+ alpha-helix       0.54      0.51      0.53       906
+  beta-sheet       0.51      0.41      0.45       684
+        coil       0.60      0.68      0.64      1410
+
+    accuracy                           0.57      3000
+   macro avg       0.55      0.53      0.54      3000
+weighted avg       0.56      0.57      0.56      3000
+
+
+"""
