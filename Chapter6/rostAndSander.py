@@ -183,6 +183,34 @@ y_test_preds = ensemble_predict(models, test_loader)
 accuracy = accuracy_score(y_test_tensor.cpu().numpy(), y_test_preds)
 print(f'Ensemble Test Accuracy: {accuracy:.4f}')
 
+
+def evaluate_model(model, dataloader):
+    model.eval()
+    all_preds = []
+    all_labels = []
+    with torch.no_grad():
+        for inputs, labels in dataloader:
+            outputs = model(inputs)
+            preds = torch.argmax(outputs, dim=1).cpu().numpy()
+            all_preds.extend(preds)
+            all_labels.extend(labels.cpu().numpy())
+    accuracy = accuracy_score(all_labels, all_preds)
+    return accuracy, all_preds, all_labels
+
+for i, model in enumerate(models):
+    accuracy, _, _ = evaluate_model(model, test_loader)
+    print(f"Model {i+1} Test Accuracy: {accuracy:.4f}")
+
+"""
+
+Model 1 Test Accuracy: 0.9500
+Model 2 Test Accuracy: 0.8747
+Model 3 Test Accuracy: 0.8573
+Model 4 Test Accuracy: 0.8527
+Model 5 Test Accuracy: 0.8507
+
+"""
+
 def print_dataset_parts(X, y, dataset_name):
     print(f"{dataset_name} Data Samples:")
     for i in range(len(X)):
