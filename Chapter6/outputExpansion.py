@@ -12,6 +12,7 @@ df = pd.read_csv(data_path)
 df['Date'] = pd.to_datetime(df['Date'])
 df.set_index('Date', inplace=True)
 #print(df.head())
+df.dropna(inplace=True)
 
 # close prices for prediction
 #prices = df['Close'].values
@@ -77,14 +78,11 @@ class CurrencyPredictionNN(nn.Module):
         x = self.fc4(x)
         return x
     
-def weights_init(m):
-    if isinstance(m, nn.Linear):
-        nn.init.xavier_uniform_(m.weight)
-        if m.bias is not None:
-            nn.init.constant_(m.bias, 0)
-
-model = CurrencyPredictionNN(train_X.shape[1], 128, output_days)
-model.apply(weights_init)
+# def weights_init(m):
+#     if isinstance(m, nn.Linear):
+#         nn.init.xavier_uniform_(m.weight)
+#         if m.bias is not None:
+#             nn.init.constant_(m.bias, 0)
 
 def train_model(train_X, train_y, test_X, test_y, epochs=50):
     input_dim = train_X.shape[1]
@@ -92,7 +90,6 @@ def train_model(train_X, train_y, test_X, test_y, epochs=50):
     output_dim = output_days
 
     model = CurrencyPredictionNN(input_dim, hidden_dim, output_dim)
-    model.apply(weights_init)
     criterion = nn.MSELoss()
     optimizer = optim.Adam(model.parameters(), lr=0.0001) 
 
