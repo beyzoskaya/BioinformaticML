@@ -115,7 +115,10 @@ def train_model(train_X, train_y, test_X, test_y, epochs=50):
     model.eval()
     with torch.no_grad():
         predictions = model(test_X)
+        print(f"Predictions: {predictions}")
+        print(f"Predictions contain NaNs: {torch.isnan(predictions).any()}")
         test_loss = criterion(predictions, test_y)
+        print(f"Test targets contain NaNs: {torch.isnan(test_y).any()}")
         print(f'Test Loss: {test_loss.item():.4f}')
        
         plt.figure(figsize=(14, 7))
